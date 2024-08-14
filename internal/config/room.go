@@ -316,3 +316,16 @@ func (s *Room) GetRoomUrl(roomName string) string {
 
 	return instanceUrl.String()
 }
+
+func (s *Room) GetCotesterUrl(roomName string) string {
+	instanceUrl := s.GetInstanceUrl()
+
+	if strings.HasPrefix(instanceUrl.Host, "*.") {
+		instanceUrl.Host = roomName + "." + strings.TrimPrefix(instanceUrl.Host, "*.")
+	} else {
+		instanceUrl.Path = path.Join(instanceUrl.Path, s.CotesterPathPrefix, roomName) + "/"
+	}
+
+	return instanceUrl.String()
+
+}

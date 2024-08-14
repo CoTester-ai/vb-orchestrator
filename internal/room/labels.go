@@ -12,10 +12,11 @@ import (
 var labelRegex = regexp.MustCompile(`^[a-z0-9.-]+$`)
 
 type RoomLabels struct {
-	Name string
-	URL  string
-	Mux  bool
-	Epr  EprPorts
+	Name        string
+	URL         string
+	CotesterURL string
+	Mux         bool
+	Epr         EprPorts
 
 	NekoImage  string
 	ApiVersion int
@@ -40,6 +41,11 @@ func (manager *RoomManagerCtx) extractLabels(labels map[string]string) (*RoomLab
 		// TODO: It should be always available.
 		url = manager.config.GetRoomUrl(name)
 		//return nil, fmt.Errorf("damaged container labels: url not found")
+	}
+
+	cotesterURL, ok := labels["cotester.vb-orchestrator.url"]
+	if !ok {
+		return nil, fmt.Errorf("damaged container labels: cotester.vb-orchestrator.url not found")
 	}
 
 	var mux bool
@@ -127,10 +133,11 @@ func (manager *RoomManagerCtx) extractLabels(labels map[string]string) (*RoomLab
 	}
 
 	return &RoomLabels{
-		Name: name,
-		URL:  url,
-		Mux:  mux,
-		Epr:  epr,
+		Name:        name,
+		URL:         url,
+		CotesterURL: cotesterURL,
+		Mux:         mux,
+		Epr:         epr,
 
 		NekoImage:  nekoImage,
 		ApiVersion: apiVersion,
@@ -142,10 +149,11 @@ func (manager *RoomManagerCtx) extractLabels(labels map[string]string) (*RoomLab
 
 func (manager *RoomManagerCtx) serializeLabels(labels RoomLabels) map[string]string {
 	labelsMap := map[string]string{
-		"m1k1o.neko_rooms.name":       labels.Name,
-		"m1k1o.neko_rooms.url":        manager.config.GetRoomUrl(labels.Name),
-		"m1k1o.neko_rooms.instance":   manager.config.InstanceName,
-		"m1k1o.neko_rooms.neko_image": labels.NekoImage,
+		"m1k1o.neko_rooms.name":        labels.Name,
+		"m1k1o.neko_rooms.url":         manager.config.GetRoomUrl(labels.Name),
+		"cotester.vb-orchestrator.url": manager.config.GetCotesterUrl(labels.Name),
+		"m1k1o.neko_rooms.instance":    manager.config.InstanceName,
+		"m1k1o.neko_rooms.neko_image":  labels.NekoImage,
 	}
 
 	// api version 2 is currently default

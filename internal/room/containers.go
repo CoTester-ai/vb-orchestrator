@@ -25,6 +25,7 @@ func (manager *RoomManagerCtx) containerToEntry(container dockerTypes.Container)
 	entry := &types.RoomEntry{
 		ID:             roomId,
 		URL:            labels.URL,
+		CotesterURL:    labels.CotesterURL,
 		Name:           labels.Name,
 		NekoImage:      labels.NekoImage,
 		IsOutdated:     labels.NekoImage != container.Image,

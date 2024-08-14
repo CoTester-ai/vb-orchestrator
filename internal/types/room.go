@@ -18,6 +18,7 @@ type RoomsConfig struct {
 type RoomEntry struct {
 	ID             string            `json:"id"`
 	URL            string            `json:"url"`
+	CotesterURL    string            `json:"cotesterUrl"`
 	Name           string            `json:"name"`
 	NekoImage      string            `json:"neko_image"`
 	IsOutdated     bool              `json:"is_outdated"`
