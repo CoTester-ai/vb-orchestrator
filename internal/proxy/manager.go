@@ -140,8 +140,8 @@ func (p *ProxyManagerCtx) Start() {
 
 					// if proxying is disabled
 					if enabled {
-						e.handler = p.newProxyHandler(path, host)
-						cotesterEntry.handler = p.newProxyHandler(cotesterPath, cotesterHost)
+						e.handler = p.newProxyHandler(path, host, "http")
+						cotesterEntry.handler = p.newProxyHandler(cotesterPath, cotesterHost, "ws")
 					}
 
 					p.handlers.Insert(path, e)
@@ -208,8 +208,8 @@ func (p *ProxyManagerCtx) Refresh() error {
 
 		// if proxying is enabled and room is ready
 		if enabled && room.IsReady {
-			e.handler = p.newProxyHandler(path, host)
-			cotesterEntry.handler = p.newProxyHandler(cotesterPath, cotesterHost)
+			e.handler = p.newProxyHandler(path, host, "http")
+			cotesterEntry.handler = p.newProxyHandler(cotesterPath, cotesterHost, "ws")
 		}
 
 		p.handlers.Insert(path, e)
@@ -251,9 +251,9 @@ func (p *ProxyManagerCtx) parseLabels(labels map[string]string) (enabled bool, p
 	return
 }
 
-func (p *ProxyManagerCtx) newProxyHandler(prefix, host string) http.Handler {
+func (p *ProxyManagerCtx) newProxyHandler(prefix, host, scheme string) http.Handler {
 	handler := httputil.NewSingleHostReverseProxy(&url.URL{
-		Scheme: "http",
+		Scheme: scheme,
 		Host:   host,
 	})
 	handler.ErrorHandler = func(w http.ResponseWriter, r *http.Request, err error) {
