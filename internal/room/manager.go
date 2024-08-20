@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -247,7 +248,10 @@ func (manager *RoomManagerCtx) Create(ctx context.Context, settings types.RoomSe
 		return "", fmt.Errorf("invalid container name, must match %s", dockerNames.RestrictedNameChars)
 	}
 
-	if in, _ := utils.ArrayIn(settings.NekoImage, manager.config.NekoImages); !in {
+	i := slices.IndexFunc(manager.config.NekoImages, func(s string) bool {
+		return strings.HasPrefix(settings.NekoImage, s)
+	})
+	if i == -1 {
 		return "", fmt.Errorf("invalid neko image")
 	}
 
@@ -545,7 +549,7 @@ func (manager *RoomManagerCtx) Create(ctx context.Context, settings types.RoomSe
 			readOnly = mount.Type == types.MountProtected
 
 			// public whitelisted mounts
-			var isAllowed = false
+			isAllowed := false
 			for _, path := range manager.config.MountsWhitelist {
 				if strings.HasPrefix(hostPath, path) {
 					isAllowed = true
@@ -690,7 +694,6 @@ func (manager *RoomManagerCtx) Create(ctx context.Context, settings types.RoomSe
 		nil,
 		containerName,
 	)
-
 	if err != nil {
 		return "", err
 	}
@@ -733,7 +736,6 @@ func (manager *RoomManagerCtx) Remove(ctx context.Context, id string) error {
 		Signal:  "SIGTERM",
 		Timeout: &manager.config.StopTimeoutSec,
 	})
-
 	if err != nil {
 		return err
 	}
