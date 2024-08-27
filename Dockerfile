@@ -17,8 +17,12 @@ RUN npm run build
 #
 # STAGE 2: build executable binary
 #
-FROM golang:1.21-bullseye as builder
+FROM golang:1.21-alpine as builder
 WORKDIR /app
+
+
+RUN apk update && apk upgrade && apk add --no-cache ca-certificates
+RUN update-ca-certificates
 
 COPY . .
 RUN go get -v -t -d .; \
@@ -28,6 +32,7 @@ RUN go get -v -t -d .; \
 # STAGE 3: build a small image
 #
 FROM scratch
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /app/bin/neko_rooms /app/bin/neko_rooms
 COPY --from=frontend /src/dist/ /var/www
 

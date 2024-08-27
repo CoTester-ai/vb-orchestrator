@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/m1k1o/neko-rooms/internal/types"
 )
@@ -23,6 +24,10 @@ type RoomLabels struct {
 
 	BrowserPolicy *BrowserPolicyLabels
 	UserDefined   map[string]string
+	Deadline      time.Time
+	ApiEndpoint   string
+	SessionID     string
+	ApiKey        string
 }
 
 type BrowserPolicyLabels struct {
@@ -132,6 +137,31 @@ func (manager *RoomManagerCtx) extractLabels(labels map[string]string) (*RoomLab
 		}
 	}
 
+	deadlineStr, ok := labels["cotester.vb-orchestrator.deadline"]
+	if !ok {
+		return nil, fmt.Errorf("damaged container labels: cotester.vb-orchestrator.deadline not found")
+	}
+
+	deadline, err := time.Parse(time.RFC3339, deadlineStr)
+	if err != nil {
+		return nil, err
+	}
+
+	apiEndpoint, ok := labels["cotester.vb-orchestrator.api-endpoint"]
+	if !ok {
+		return nil, fmt.Errorf("damaged container labels: cotester.vb-orchestrator.api-endpoint not found")
+	}
+
+	sessionID, ok := labels["cotester.vb-orchestrator.session-id"]
+	if !ok {
+		return nil, fmt.Errorf("damaged container labels: cotester.vb-orchestrator.session-id not found")
+	}
+
+	apiKey, ok := labels["cotester.vb-orchestrator.api-key"]
+	if !ok {
+		return nil, fmt.Errorf("damaged container labels: cotester.vb-orchestrator.api-key not found")
+	}
+
 	return &RoomLabels{
 		Name:        name,
 		URL:         url,
@@ -144,16 +174,24 @@ func (manager *RoomManagerCtx) extractLabels(labels map[string]string) (*RoomLab
 
 		BrowserPolicy: browserPolicy,
 		UserDefined:   userDefined,
+		Deadline:      deadline,
+		ApiEndpoint:   apiEndpoint,
+		SessionID:     sessionID,
+		ApiKey:        apiKey,
 	}, nil
 }
 
 func (manager *RoomManagerCtx) serializeLabels(labels RoomLabels) map[string]string {
 	labelsMap := map[string]string{
-		"m1k1o.neko_rooms.name":        labels.Name,
-		"m1k1o.neko_rooms.url":         manager.config.GetRoomUrl(labels.Name),
-		"cotester.vb-orchestrator.url": manager.config.GetCotesterUrl(labels.Name),
-		"m1k1o.neko_rooms.instance":    manager.config.InstanceName,
-		"m1k1o.neko_rooms.neko_image":  labels.NekoImage,
+		"m1k1o.neko_rooms.name":                 labels.Name,
+		"m1k1o.neko_rooms.url":                  manager.config.GetRoomUrl(labels.Name),
+		"cotester.vb-orchestrator.url":          manager.config.GetCotesterUrl(labels.Name),
+		"m1k1o.neko_rooms.instance":             manager.config.InstanceName,
+		"m1k1o.neko_rooms.neko_image":           labels.NekoImage,
+		"cotester.vb-orchestrator.deadline":     labels.Deadline.Format(time.RFC3339),
+		"cotester.vb-orchestrator.api-endpoint": labels.ApiEndpoint,
+		"cotester.vb-orchestrator.session-id":   labels.SessionID,
+		"cotester.vb-orchestrator.api-key":      labels.ApiKey,
 	}
 
 	// api version 2 is currently default
