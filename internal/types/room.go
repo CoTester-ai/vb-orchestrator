@@ -91,10 +91,10 @@ type RoomSettings struct {
 
 	BrowserPolicy *BrowserPolicy `json:"browser_policy,omitempty"`
 
-	TimeToLive  time.Duration `json:"ttl,omitempty"`
-	ApiEndpoint string        `json:"apiEndpoint,omitempty"`
-	SessionID   string        `json:"sessionID,omitempty"`
-	ApiKey      string        `json:"apiKey,omitempty"`
+	TimeToLive  string `json:"ttl,omitempty"`
+	ApiEndpoint string `json:"apiEndpoint,omitempty"`
+	SessionID   string `json:"sessionID,omitempty"`
+	ApiKey      string `json:"apiKey,omitempty"`
 }
 
 func (settings *RoomSettings) ToEnv(config *config.Room, ports PortSettings) ([]string, error) {

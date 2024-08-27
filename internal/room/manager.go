@@ -358,6 +358,11 @@ func (manager *RoomManagerCtx) Create(ctx context.Context, settings types.RoomSe
 		}
 	}
 
+	ttl, err := time.ParseDuration(settings.TimeToLive)
+	if err != nil {
+		return "", err
+	}
+
 	labels := manager.serializeLabels(RoomLabels{
 		Name: roomName,
 		Mux:  manager.config.Mux,
@@ -368,7 +373,7 @@ func (manager *RoomManagerCtx) Create(ctx context.Context, settings types.RoomSe
 
 		BrowserPolicy: browserPolicyLabels,
 		UserDefined:   settings.Labels,
-		Deadline:      time.Now().Add(settings.TimeToLive),
+		Deadline:      time.Now().Add(ttl),
 		ApiEndpoint:   settings.ApiEndpoint,
 		SessionID:     settings.SessionID,
 		ApiKey:        settings.ApiKey,
