@@ -62,7 +62,13 @@ func (w *WorkerManagerCtx) checkDeadlines() {
 			}
 
 			for _, room := range rooms {
-				deadline, err := time.Parse(time.RFC3339, room.Labels["cotester.vb-orchestrator.deadline"])
+				deadlineStr, ok := room.ContainerLabels["cotester.vb-orchestrator.deadline"]
+				if !ok {
+					w.logger.Warn().Str("room", room.ID).Msg("Deadline not found in room labels")
+					continue
+				}
+
+				deadline, err := time.Parse(time.RFC3339, deadlineStr)
 				if err != nil {
 					w.logger.Error().Err(err).Str("room", room.ID).Msg("Failed to parse deadline")
 					continue
