@@ -27,6 +27,7 @@ type RoomLabels struct {
 	Deadline      time.Time
 	ApiEndpoint   string
 	SessionID     string
+	ApiKey        string
 }
 
 type BrowserPolicyLabels struct {
@@ -156,6 +157,11 @@ func (manager *RoomManagerCtx) extractLabels(labels map[string]string) (*RoomLab
 		return nil, fmt.Errorf("damaged container labels: cotester.vb-orchestrator.session-id not found")
 	}
 
+	apiKey, ok := labels["cotester.vb-orchestrator.api-key"]
+	if !ok {
+		return nil, fmt.Errorf("damaged container labels: cotester.vb-orchestrator.api-key not found")
+	}
+
 	return &RoomLabels{
 		Name:        name,
 		URL:         url,
@@ -171,6 +177,7 @@ func (manager *RoomManagerCtx) extractLabels(labels map[string]string) (*RoomLab
 		Deadline:      deadline,
 		ApiEndpoint:   apiEndpoint,
 		SessionID:     sessionID,
+		ApiKey:        apiKey,
 	}, nil
 }
 
@@ -184,6 +191,7 @@ func (manager *RoomManagerCtx) serializeLabels(labels RoomLabels) map[string]str
 		"cotester.vb-orchestrator.deadline":     labels.Deadline.Format(time.RFC3339),
 		"cotester.vb-orchestrator.api-endpoint": labels.ApiEndpoint,
 		"cotester.vb-orchestrator.session-id":   labels.SessionID,
+		"cotester.vb-orchestrator.api-key":      labels.ApiKey,
 	}
 
 	// api version 2 is currently default

@@ -371,6 +371,7 @@ func (manager *RoomManagerCtx) Create(ctx context.Context, settings types.RoomSe
 		Deadline:      time.Now().Add(settings.TimeToLive),
 		ApiEndpoint:   settings.ApiEndpoint,
 		SessionID:     settings.SessionID,
+		ApiKey:        settings.ApiKey,
 	})
 
 	//

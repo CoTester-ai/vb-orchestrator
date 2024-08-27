@@ -135,10 +135,17 @@ func (w *WorkerManagerCtx) updateSessionStatus(event *types.RoomEvent, status st
 		return
 	}
 
+	apiKey, ok := event.ContainerLabels["cotester.vb-orchestrator.api-key"]
+	if !ok {
+		w.logger.Error().Str("room", event.ID).Msg("API key not found in room labels")
+		return
+	}
+
 	url := fmt.Sprintf("%s/api/v1/sessions", apiEndpoint)
 	data := map[string]string{
 		"sessionId": sessionId,
 		"status":    status,
+		"secretKey": apiKey,
 	}
 	jsonData, err := json.Marshal(data)
 	if err != nil {
