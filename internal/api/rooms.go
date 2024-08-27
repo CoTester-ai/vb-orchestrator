@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 
@@ -55,6 +56,7 @@ func (manager *ApiManagerCtx) roomCreate(w http.ResponseWriter, r *http.Request)
 		Resources: types.RoomResources{
 			ShmSize: 2 * 1e9,
 		},
+		TimeToLive: 1 * time.Hour,
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {

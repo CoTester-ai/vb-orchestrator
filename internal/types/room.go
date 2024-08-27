@@ -90,6 +90,10 @@ type RoomSettings struct {
 	DNS      []string `json:"dns,omitempty"`
 
 	BrowserPolicy *BrowserPolicy `json:"browser_policy,omitempty"`
+
+	TimeToLive  time.Duration `json:"ttl,omitempty"`
+	ApiEndpoint string        `json:"api_endpoint,omitempty"`
+	SessionID   string        `json:"session_id,omitempty"`
 }
 
 func (settings *RoomSettings) ToEnv(config *config.Room, ports PortSettings) ([]string, error) {
