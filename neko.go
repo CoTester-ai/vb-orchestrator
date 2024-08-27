@@ -17,6 +17,7 @@ import (
 	"github.com/m1k1o/neko-rooms/internal/pull"
 	"github.com/m1k1o/neko-rooms/internal/room"
 	"github.com/m1k1o/neko-rooms/internal/server"
+	"github.com/m1k1o/neko-rooms/internal/worker"
 )
 
 const Header = `&34
@@ -113,6 +114,7 @@ type MainCtx struct {
 	apiManager    *api.ApiManagerCtx
 	proxyManager  *proxy.ProxyManagerCtx
 	serverManager *server.ServerManagerCtx
+	workerManager *worker.WorkerManagerCtx
 }
 
 func (main *MainCtx) Preflight() {
@@ -156,6 +158,12 @@ func (main *MainCtx) Start() {
 		main.proxyManager,
 	)
 	main.serverManager.Start()
+
+	main.workerManager = worker.New(
+		client,
+		main.roomManager,
+	)
+	main.workerManager.Start()
 }
 
 func (main *MainCtx) Shutdown() {
@@ -172,6 +180,9 @@ func (main *MainCtx) Shutdown() {
 
 	err = main.roomManager.EventsLoopStop()
 	main.logger.Err(err).Msg("room events loop shutdown")
+
+	err = main.workerManager.Shutdown()
+	main.logger.Err(err).Msg("worker manager shutdown")
 }
 
 func (main *MainCtx) ServeCommand(cmd *cobra.Command, args []string) {
