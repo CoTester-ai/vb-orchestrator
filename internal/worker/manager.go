@@ -74,7 +74,7 @@ func (w *WorkerManagerCtx) checkDeadlines() {
 
 				if time.Now().After(deadline) {
 					w.logger.Info().Str("room", room.ID).Msg("Room deadline reached, stopping")
-					err := w.roomManager.Stop(w.ctx, room.ID)
+					err := w.roomManager.Remove(w.ctx, room.ID)
 					if err != nil {
 						w.logger.Error().Err(err).Str("room", room.ID).Msg("Failed to stop room")
 					}
