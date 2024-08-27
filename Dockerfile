@@ -20,6 +20,10 @@ RUN npm run build
 FROM golang:1.21-bullseye as builder
 WORKDIR /app
 
+
+RUN apk update && apk upgrade && apk add --no-cache ca-certificates
+RUN update-ca-certificates
+
 COPY . .
 RUN go get -v -t -d .; \
     CGO_ENABLED=0 go build -o bin/neko_rooms cmd/neko_rooms/main.go
@@ -28,6 +32,7 @@ RUN go get -v -t -d .; \
 # STAGE 3: build a small image
 #
 FROM scratch
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /app/bin/neko_rooms /app/bin/neko_rooms
 COPY --from=frontend /src/dist/ /var/www
 

@@ -5,11 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"time"
 
-	dockerTypes "github.com/docker/docker/api/types"
 	dockerClient "github.com/docker/docker/client"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -97,35 +95,12 @@ func (w *WorkerManagerCtx) listenEvents() {
 			w.logger.Error().Err(err).Msg("Error from room events")
 		case event := <-events:
 			if event.Action == types.RoomEventStopped || event.Action == types.RoomEventDestroyed {
-				w.printLogs(event.ID)
 				w.updateSessionStatus(&event, "STOPPED")
 			} else if event.Action == types.RoomEventStarted {
 				w.updateSessionStatus(&event, "RUNNING")
 			}
-			// Add more event types as needed
 		}
 	}
-}
-
-func (w *WorkerManagerCtx) printLogs(roomID string) {
-	logs, err := w.client.ContainerLogs(w.ctx, roomID, dockerTypes.ContainerLogsOptions{
-		ShowStdout: true,
-		ShowStderr: true,
-		Tail:       "100",
-	})
-	if err != nil {
-		w.logger.Error().Err(err).Str("room", roomID).Msg("Failed to get container logs")
-		return
-	}
-	defer logs.Close()
-
-	logContent, err := io.ReadAll(logs)
-	if err != nil {
-		w.logger.Error().Err(err).Str("room", roomID).Msg("Failed to read container logs")
-		return
-	}
-
-	fmt.Printf("Logs for stopped room %s:\n%s\n", roomID, string(logContent))
 }
 
 func (w *WorkerManagerCtx) updateSessionStatus(event *types.RoomEvent, status string) {
