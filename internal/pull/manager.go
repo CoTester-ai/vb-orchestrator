@@ -6,6 +6,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"slices"
+	"strings"
 	"sync"
 	"time"
 
@@ -16,7 +18,6 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/m1k1o/neko-rooms/internal/types"
-	"github.com/m1k1o/neko-rooms/internal/utils"
 )
 
 type PullManagerCtx struct {
@@ -75,7 +76,9 @@ func (manager *PullManagerCtx) setDone() {
 }
 
 func (manager *PullManagerCtx) Start(request types.PullStart) error {
-	if in, _ := utils.ArrayIn(request.NekoImage, manager.images); !in {
+	if !slices.ContainsFunc(manager.images, func(prefix string) bool {
+		return strings.HasPrefix(request.NekoImage, prefix)
+	}) {
 		return fmt.Errorf("unknown neko image")
 	}
 
@@ -103,7 +106,6 @@ func (manager *PullManagerCtx) Start(request types.PullStart) error {
 	}
 
 	reader, err := manager.client.ImagePull(ctx, request.NekoImage, opts)
-
 	if err != nil {
 		manager.setDone()
 		return err
@@ -160,7 +162,6 @@ func (manager *PullManagerCtx) Stop() error {
 
 	if !manager.status.Active {
 		return fmt.Errorf("pull is not in progess")
-
 	}
 
 	manager.cancel()
